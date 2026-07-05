@@ -24,12 +24,33 @@ db = Database()
 
 @app.get("/health")
 def health_check():
+    import socket
+    results = {}
+    
+    # 1. Check database
     try:
-        # Check DB connection
         db.get_forms()
-        return {"status": "ok", "database": "connected"}
+        results["database"] = "connected"
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        results["database"] = f"error: {str(e)}"
+        
+    # 2. Diagnose SMTP ports to smtp.gmail.com
+    smtp_host = "smtp.gmail.com"
+    for port in [465, 587]:
+        try:
+            # We resolve host to IPv4 to mimic actual notifier logic
+            resolved_ip = socket.gethostbyname(smtp_host)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(5.0)
+            s.connect((resolved_ip, port))
+            s.close()
+            results[f"smtp_{port}"] = "REACHABLE"
+        except socket.timeout:
+            results[f"smtp_{port}"] = "TIMED_OUT (Blocked by firewall)"
+        except Exception as e:
+            results[f"smtp_{port}"] = f"FAILED: {str(e)}"
+            
+    return {"status": "ok" if "error" not in str(results) else "error", "diagnostics": results}
 
 # --- Pydantic Schemas ---
 class FormSchema(BaseModel):
