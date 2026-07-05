@@ -712,6 +712,13 @@ class EmailNotifier(BaseNotifier):
         if not all([host, port, user, pwd]):
             return "FAILED", "Email credentials missing. Add a Resend API Key (recommended) or SMTP settings in Global Settings."
 
+        import socket
+        try:
+            # Resolve hostname to IPv4 to bypass Vercel/AWS Lambda IPv6 routing bugs
+            resolved_host = socket.gethostbyname(host)
+        except Exception:
+            resolved_host = host
+
         try:
             msg = MIMEText(body, "plain", "utf-8")
             msg["Subject"] = subject
@@ -720,19 +727,19 @@ class EmailNotifier(BaseNotifier):
 
             port = int(port)
             if port == 465:
-                with smtplib.SMTP_SSL(host, port, timeout=15) as server:
+                with smtplib.SMTP_SSL(resolved_host, port, timeout=15, server_hostname=host) as server:
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             else:
-                with smtplib.SMTP(host, port, timeout=15) as server:
-                    server.starttls()
+                with smtplib.SMTP(resolved_host, port, timeout=15) as server:
+                    server.starttls(server_hostname=host)
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             return "SUCCESS", f"Email sent to {recipient} via SMTP"
         except Exception as e:
             err_msg = str(e)
             if "timed out" in err_msg or "Network is unreachable" in err_msg:
-                err_msg += " — SMTP is blocked on this server. Please use Resend API instead (add Resend API Key in Settings)."
+                err_msg += " — SMTP connection failed. Check your port (try 587 if 465 fails) or credentials."
             return "FAILED", f"SMTP Error: {err_msg}"
 
 

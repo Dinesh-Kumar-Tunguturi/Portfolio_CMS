@@ -214,8 +214,8 @@ def submit_form(slug: str, data: SubmissionSchema, bg_tasks: BackgroundTasks, re
         db.log(slug, "PAYMENT", "PENDING",
                f"Automatic payment link generated: {currency} {amount} for submission #{sub_id}")
     
-    # Delegate to Background Task for non-blocking notification dispatch
-    bg_tasks.add_task(dispatch_notifications_task, sub_id, slug, payment_link)
+    # Execute synchronously instead of background task to prevent Vercel suspending the process during SMTP operations
+    dispatch_notifications_task(sub_id, slug, payment_link)
     
     return {"status": "success", "message": "Submission recorded", "submission_id": sub_id}
 
@@ -272,9 +272,9 @@ def send_payment_link(payload: SendPaymentSchema, bg_tasks: BackgroundTasks, req
 
     payment_link = f"{origin}/pay/{token}"
 
-    # Re-dispatch notifications with payment link injected
-    bg_tasks.add_task(dispatch_notifications_task, payload.submission_id, submission["form_slug"], payment_link)
-
+    # Execute synchronously instead of background task to prevent Vercel suspending the process during SMTP operations
+    dispatch_notifications_task(payload.submission_id, submission["form_slug"], payment_link)
+ 
     return {"status": "success", "payment_token": token, "payment_link": payment_link}
 
 @api_router.get("/payments/{token}")
