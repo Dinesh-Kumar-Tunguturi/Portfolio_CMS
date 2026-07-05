@@ -128,24 +128,20 @@ body {
   transition: color 0.25s ease;
 }
 
-/* Normal Active State */
+/* ═══════ Center Raised Button (Active Item) ═══════ */
 .bottom-nav-item.active {
-  color: #00ff41;
-}
-
-/* ═══════ Center Raised Button (Submissions) ═══════ */
-.bottom-nav-item:nth-child(3) {
   flex: none;
   width: 70px;
   height: 70px;
   position: relative;
   top: -25px;
   background: transparent;
+  color: #00ff41;
 }
 
 /* The curved cutout on the main bar */
-.bottom-nav-item:nth-child(3)::before,
-.bottom-nav-item:nth-child(3)::after {
+.bottom-nav-item.active::before,
+.bottom-nav-item.active::after {
   content: "";
   position: absolute;
   top: 25px; /* Aligns exactly with the top of the main bar */
@@ -154,11 +150,11 @@ body {
   background: transparent;
   pointer-events: none;
 }
-.bottom-nav-item:nth-child(3)::before {
+.bottom-nav-item.active::before {
   left: -21px; /* Slight overlap to prevent 1px sub-pixel gaps */
   background: radial-gradient(circle at top left, transparent 21px, #1c1c1e 22px);
 }
-.bottom-nav-item:nth-child(3)::after {
+.bottom-nav-item.active::after {
   right: -21px;
   background: radial-gradient(circle at top right, transparent 21px, #1c1c1e 22px);
 }
@@ -178,28 +174,20 @@ body {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #2c2c2e; /* Default dark for inactive */
+  background: #00ff41; /* Vibrant green */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
 }
 
-.bottom-nav-item.active .center-circle {
-  background: #00ff41; /* Vibrant green like screenshot */
-}
-
-.bottom-nav-item:nth-child(3) svg {
+.bottom-nav-item.active svg {
   margin: 0;
   width: 28px;
   height: 28px;
-  stroke: #8e8e93; /* Inactive icon color */
-}
-.bottom-nav-item.active:nth-child(3) svg {
   stroke: #1c1c1e; /* Dark icon on bright green background */
 }
 
-.bottom-nav-item:nth-child(3) span {
+.bottom-nav-item.active span {
   display: none; /* Hide text for the big center button */
 }
 
