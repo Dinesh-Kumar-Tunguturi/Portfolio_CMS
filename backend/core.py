@@ -678,7 +678,14 @@ class EmailNotifier(BaseNotifier):
         subject = self.interpolate(form_config["email_subject"], submission)
         body = self.interpolate(form_config["email_body"], submission)
 
+        import socket
+        orig_getaddrinfo = socket.getaddrinfo
+        def ipv4_getaddrinfo(h, p, family=0, type=0, proto=0, flags=0):
+            return orig_getaddrinfo(h, p, socket.AF_INET, type, proto, flags)
+
         try:
+            socket.getaddrinfo = ipv4_getaddrinfo
+
             msg = MIMEText(body, "plain", "utf-8")
             msg["Subject"] = subject
             msg["From"] = f"{from_name} <{user}>"
@@ -686,20 +693,20 @@ class EmailNotifier(BaseNotifier):
 
             port = int(port)
             # Use SSL if port is 465, else use standard STARTTLS
-            # We explicitly set source_address=('0.0.0.0', 0) to force IPv4
-            # because Vercel/AWS Lambda throws [Errno 101] on IPv6 resolutions for smtp.gmail.com
             if port == 465:
-                with smtplib.SMTP_SSL(host, port, timeout=10, source_address=('0.0.0.0', 0)) as server:
+                with smtplib.SMTP_SSL(host, port, timeout=10) as server:
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             else:
-                with smtplib.SMTP(host, port, timeout=10, source_address=('0.0.0.0', 0)) as server:
+                with smtplib.SMTP(host, port, timeout=10) as server:
                     server.starttls()
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             return "SUCCESS", f"Email successfully sent to {recipient}"
         except Exception as e:
             return "FAILED", f"SMTP Error: {str(e)}"
+        finally:
+            socket.getaddrinfo = orig_getaddrinfo
 
 
 class WhatsAppNotifier(BaseNotifier):
