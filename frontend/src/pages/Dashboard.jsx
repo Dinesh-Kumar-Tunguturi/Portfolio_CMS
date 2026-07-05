@@ -41,6 +41,9 @@ export default function Dashboard() {
   const [payCurrency, setPayCurrency] = useState('INR');
   const [paySending, setPaySending] = useState(false);
 
+  // Settings Edit State
+  const [isSettingsEditing, setIsSettingsEditing] = useState(false);
+
   // Filter Submissions State
   const [submissionFilter, setSubmissionFilter] = useState('');
   const [paymentFilter, setPaymentFilter] = useState('');
@@ -77,7 +80,7 @@ export default function Dashboard() {
       body: JSON.stringify({ settings })
     })
       .then(r => r.json())
-      .then(() => { alert('Settings saved successfully!'); fetchLogs(); })
+      .then(() => { alert('Settings saved successfully!'); fetchLogs(); setIsSettingsEditing(false); })
       .catch(err => alert('Failed to save settings: ' + err.message))
       .finally(() => setLoading(false));
   };
@@ -444,9 +447,15 @@ export default function Dashboard() {
           <div className="tab-view-container animated-fade-in">
             <header className="view-header">
               <div>
-                <h1 className="view-title">Settings</h1>
-                <p className="subtitle">SMTP, WhatsApp, Razorpay & PayPal credentials</p>
+                <h1 className="view-title">Global Settings</h1>
+                <p className="subtitle">Configure system-wide integrations and API keys</p>
               </div>
+              <button 
+                className={`btn ${isSettingsEditing ? 'btn-secondary' : 'btn-primary'}`} 
+                onClick={() => setIsSettingsEditing(!isSettingsEditing)}
+              >
+                {isSettingsEditing ? 'Cancel Edit' : 'Edit Settings'}
+              </button>
             </header>
 
             <form onSubmit={handleSaveSettings} className="settings-section">
@@ -455,27 +464,38 @@ export default function Dashboard() {
                   <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: 'var(--accent-purple)' }}>Gmail SMTP</h3>
                   <div className="form-group">
                     <label>SMTP Host</label>
-                    <input type="text" placeholder="smtp.gmail.com" required className="form-control" value={settings.smtp_host} onChange={e => setSettings({...settings, smtp_host: e.target.value})} />
+                    <input type="text" placeholder="smtp.gmail.com" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_host || ''} onChange={e => setSettings({...settings, smtp_host: e.target.value})} />
                   </div>
                   <div className="form-row">
-                    <div className="form-group"><label>SMTP Port</label><input type="text" placeholder="465" required className="form-control" value={settings.smtp_port} onChange={e => setSettings({...settings, smtp_port: e.target.value})} /></div>
-                    <div className="form-group"><label>Sender Name</label><input type="text" placeholder="Acme CMS" className="form-control" value={settings.smtp_from_name} onChange={e => setSettings({...settings, smtp_from_name: e.target.value})} /></div>
+                    <div className="form-group"><label>SMTP Port</label><input type="text" placeholder="465" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_port || ''} onChange={e => setSettings({...settings, smtp_port: e.target.value})} /></div>
+                    <div className="form-group"><label>Sender Name</label><input type="text" placeholder="Acme CMS" className="form-control" disabled={!isSettingsEditing} value={settings.smtp_from_name || ''} onChange={e => setSettings({...settings, smtp_from_name: e.target.value})} /></div>
                   </div>
-                  <div className="form-group"><label>SMTP User</label><input type="email" placeholder="example@gmail.com" required className="form-control" value={settings.smtp_user} onChange={e => setSettings({...settings, smtp_user: e.target.value})} /></div>
-                  <div className="form-group"><label>App Password</label><input type="password" placeholder="••••••••" required className="form-control" value={settings.smtp_pass} onChange={e => setSettings({...settings, smtp_pass: e.target.value})} /></div>
+                  <div className="form-group"><label>SMTP User</label><input type="email" placeholder="example@gmail.com" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_user || ''} onChange={e => setSettings({...settings, smtp_user: e.target.value})} /></div>
+                  <div className="form-group"><label>App Password</label><input type="password" placeholder="••••••••" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_pass || ''} onChange={e => setSettings({...settings, smtp_pass: e.target.value})} /></div>
                 </div>
+                
                 <div className="glass-card">
                   <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: 'var(--accent-cyan)' }}>Meta WhatsApp API</h3>
-                  <div className="form-group"><label>Access Token</label><input type="password" placeholder="EAABw..." required className="form-control" value={settings.whatsapp_token} onChange={e => setSettings({...settings, whatsapp_token: e.target.value})} /></div>
-                  <div className="form-group"><label>Phone Number ID</label><input type="text" placeholder="102573..." required className="form-control" value={settings.whatsapp_phone_number_id} onChange={e => setSettings({...settings, whatsapp_phone_number_id: e.target.value})} /></div>
+                  <div className="form-group"><label>Access Token</label><input type="password" placeholder="EAABw..." required className="form-control" disabled={!isSettingsEditing} value={settings.whatsapp_token || ''} onChange={e => setSettings({...settings, whatsapp_token: e.target.value})} /></div>
+                  <div className="form-group"><label>Phone Number ID</label><input type="text" placeholder="102573..." required className="form-control" disabled={!isSettingsEditing} value={settings.whatsapp_phone_number_id || ''} onChange={e => setSettings({...settings, whatsapp_phone_number_id: e.target.value})} /></div>
+                </div>
+
+                <div className="glass-card">
+                  <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: 'var(--success)' }}>Payment Gateways</h3>
+                  <div className="form-group"><label>Razorpay Key ID</label><input type="text" placeholder="rzp_live_..." className="form-control" disabled={!isSettingsEditing} value={settings.razorpay_key_id || ''} onChange={e => setSettings({...settings, razorpay_key_id: e.target.value})} /></div>
+                  <div className="form-group"><label>Razorpay Key Secret</label><input type="password" placeholder="••••••••" className="form-control" disabled={!isSettingsEditing} value={settings.razorpay_key_secret || ''} onChange={e => setSettings({...settings, razorpay_key_secret: e.target.value})} /></div>
+                  <hr style={{ border: 0, borderTop: '1px solid var(--border-color)', margin: '1.25rem 0' }} />
+                  <div className="form-group"><label>Stripe Secret Key</label><input type="password" placeholder="sk_live_..." className="form-control" disabled={!isSettingsEditing} value={settings.stripe_secret_key || ''} onChange={e => setSettings({...settings, stripe_secret_key: e.target.value})} /></div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? 'Saving...' : 'Save All Settings'}
-                </button>
-              </div>
+              {isSettingsEditing && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', animation: 'fadeIn 0.3s' }}>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? 'Saving...' : 'Save All Settings'}
+                  </button>
+                </div>
+              )}
             </form>
 
             {/* Embedded System Audit Logs */}
