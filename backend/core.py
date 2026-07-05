@@ -713,13 +713,16 @@ class EmailNotifier(BaseNotifier):
             return "FAILED", "Email credentials missing. Add a Resend API Key (recommended) or SMTP settings in Global Settings."
 
         import socket
-        try:
-            # Resolve hostname to IPv4 to bypass Vercel/AWS Lambda IPv6 routing bugs
-            resolved_host = socket.gethostbyname(host)
-        except Exception:
-            resolved_host = host
+        orig_getaddrinfo = socket.getaddrinfo
+        def ipv4_getaddrinfo(h, p, family=0, type=0, proto=0, flags=0):
+            # Only force IPv4 (AF_INET) for the SMTP host connection
+            if h == host:
+                return orig_getaddrinfo(h, p, socket.AF_INET, type, proto, flags)
+            return orig_getaddrinfo(h, p, family, type, proto, flags)
 
         try:
+            socket.getaddrinfo = ipv4_getaddrinfo
+
             msg = MIMEText(body, "plain", "utf-8")
             msg["Subject"] = subject
             msg["From"] = f"{from_name} <{user}>"
@@ -727,12 +730,12 @@ class EmailNotifier(BaseNotifier):
 
             port = int(port)
             if port == 465:
-                with smtplib.SMTP_SSL(resolved_host, port, timeout=15, server_hostname=host) as server:
+                with smtplib.SMTP_SSL(host, port, timeout=15) as server:
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             else:
-                with smtplib.SMTP(resolved_host, port, timeout=15) as server:
-                    server.starttls(server_hostname=host)
+                with smtplib.SMTP(host, port, timeout=15) as server:
+                    server.starttls()
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             return "SUCCESS", f"Email sent to {recipient} via SMTP"
@@ -741,6 +744,8 @@ class EmailNotifier(BaseNotifier):
             if "timed out" in err_msg or "Network is unreachable" in err_msg:
                 err_msg += " — SMTP connection failed. Check your port (try 587 if 465 fails) or credentials."
             return "FAILED", f"SMTP Error: {err_msg}"
+        finally:
+            socket.getaddrinfo = orig_getaddrinfo
 
 
 class WhatsAppNotifier(BaseNotifier):
