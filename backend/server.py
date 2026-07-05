@@ -22,6 +22,15 @@ app.add_middleware(
 
 db = Database()
 
+@app.get("/health")
+def health_check():
+    try:
+        # Check DB connection
+        db.get_forms()
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 # --- Pydantic Schemas ---
 class FormSchema(BaseModel):
     name: str
