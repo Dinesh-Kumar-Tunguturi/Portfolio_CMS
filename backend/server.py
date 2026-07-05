@@ -386,9 +386,15 @@ def verify_payment(token: str, payload: VerifyPaymentSchema):
 app.include_router(api_router)
 
 # Mount Frontend Build directory if built (for single port execution)
-static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
-if os.path.exists(static_dir):
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+static_dirs = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "static"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
+]
+for static_dir in static_dirs:
+    if os.path.exists(static_dir):
+        app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+        break
+
 
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
