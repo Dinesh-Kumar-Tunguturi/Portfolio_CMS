@@ -34,21 +34,24 @@ def health_check():
     except Exception as e:
         results["database"] = f"error: {str(e)}"
         
-    # 2. Diagnose SMTP ports to smtp.gmail.com
-    smtp_host = "smtp.gmail.com"
-    for port in [465, 587]:
+    # 2. Diagnose SMTP ports
+    smtp_tests = [
+        ("smtp.gmail.com", 465),
+        ("smtp.gmail.com", 587),
+        ("smtp.smtp2go.com", 2525)
+    ]
+    for host, port in smtp_tests:
         try:
-            # We resolve host to IPv4 to mimic actual notifier logic
-            resolved_ip = socket.gethostbyname(smtp_host)
+            resolved_ip = socket.gethostbyname(host)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(5.0)
             s.connect((resolved_ip, port))
             s.close()
-            results[f"smtp_{port}"] = "REACHABLE"
+            results[f"{host}:{port}"] = "REACHABLE"
         except socket.timeout:
-            results[f"smtp_{port}"] = "TIMED_OUT (Blocked by firewall)"
+            results[f"{host}:{port}"] = "TIMED_OUT (Blocked by firewall)"
         except Exception as e:
-            results[f"smtp_{port}"] = f"FAILED: {str(e)}"
+            results[f"{host}:{port}"] = f"FAILED: {str(e)}"
             
     return {"status": "ok" if "error" not in str(results) else "error", "diagnostics": results}
 
