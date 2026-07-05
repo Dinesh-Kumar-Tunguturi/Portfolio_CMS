@@ -686,12 +686,14 @@ class EmailNotifier(BaseNotifier):
 
             port = int(port)
             # Use SSL if port is 465, else use standard STARTTLS
+            # We explicitly set source_address=('0.0.0.0', 0) to force IPv4
+            # because Vercel/AWS Lambda throws [Errno 101] on IPv6 resolutions for smtp.gmail.com
             if port == 465:
-                with smtplib.SMTP_SSL(host, port, timeout=10) as server:
+                with smtplib.SMTP_SSL(host, port, timeout=10, source_address=('0.0.0.0', 0)) as server:
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             else:
-                with smtplib.SMTP(host, port, timeout=10) as server:
+                with smtplib.SMTP(host, port, timeout=10, source_address=('0.0.0.0', 0)) as server:
                     server.starttls()
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
