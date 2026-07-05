@@ -92,7 +92,7 @@ body {
   align-items: flex-start;
   justify-content: space-around;
   z-index: 1000;
-  padding: 0 5px;
+  padding: 0;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
@@ -111,8 +111,8 @@ body {
 }
 
 .bottom-nav-item svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
   stroke-width: 2.5;
   fill: none;
@@ -144,9 +144,9 @@ body {
 
 .nav-indicator-inner {
   position: absolute;
-  top: -18px;
-  width: 56px;
-  height: 56px;
+  top: -8px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: #1c1c1e;
   display: flex;
@@ -155,8 +155,8 @@ body {
 }
 
 .nav-indicator-green {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   background: #00ff41;
   border-radius: 50%;
 }
@@ -165,21 +165,21 @@ body {
 .nav-indicator-inner::after {
   content: "";
   position: absolute;
-  top: 18px;
-  width: 16px;
-  height: 16px;
+  top: 8px;
+  width: 12px;
+  height: 12px;
   background: transparent;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
 .nav-indicator-inner::before {
-  left: -15px;
-  background: radial-gradient(circle at top left, transparent 15px, #1c1c1e 16px);
+  left: -11px;
+  background: radial-gradient(circle at top left, transparent 11px, #1c1c1e 12px);
 }
 .nav-indicator-inner::after {
-  right: -15px;
-  background: radial-gradient(circle at top right, transparent 15px, #1c1c1e 16px);
+  right: -11px;
+  background: radial-gradient(circle at top right, transparent 11px, #1c1c1e 12px);
 }
 
 /* Fix the bad black div issue on edges */
@@ -209,7 +209,7 @@ body {
   width: 24px;
   height: 24px;
   stroke: #1c1c1e;
-  transform: translateY(-16px);
+  transform: translateY(-10px);
 }
 
 .bottom-nav-item.active span {
