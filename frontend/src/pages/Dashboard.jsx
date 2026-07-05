@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('submissions');
   const [forms, setForms] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -187,107 +187,62 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="app-container">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="brand">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          <span>CMS LeadFlow</span>
-        </div>
-        <ul className="nav-links">
-          <li className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => { setActiveTab('overview'); fetchSubmissions(); fetchLogs(); fetchPayments(); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-            Overview
-          </li>
-          <li className={`nav-item ${activeTab === 'forms' ? 'active' : ''}`} onClick={() => { setActiveTab('forms'); fetchForms(); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Forms Manager
-          </li>
-          <li className={`nav-item ${activeTab === 'submissions' ? 'active' : ''}`} onClick={() => { setActiveTab('submissions'); fetchSubmissions(); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Submissions
-          </li>
-          <li className={`nav-item ${activeTab === 'payments' ? 'active' : ''}`} onClick={() => { setActiveTab('payments'); fetchPayments(); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Payments
-          </li>
-          <li className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); fetchSettings(); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Settings
-          </li>
-          <li className={`nav-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => { setActiveTab('logs'); fetchLogs(); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 17 10 11 15 16 22 9"/><polyline points="16 9 22 9 22 15"/></svg>
-            System Logs
-          </li>
-        </ul>
-      </aside>
+    <div className="app-layout">
 
-      {/* Main Content */}
-      <main className="main-content">
-
+      {/* Main Content Area */}
+      <main className="app-main-viewport">
         {/* ═══════ OVERVIEW ═══════ */}
         {activeTab === 'overview' && (
-          <div>
-            <header>
+          <div className="tab-view-container animated-fade-in">
+            <header className="view-header">
               <div>
-                <h1>Dashboard Overview</h1>
+                <h1 className="view-title">Dashboard Overview</h1>
                 <p className="subtitle">Real-time stats on forms, messaging & payments</p>
               </div>
-              <button className="btn btn-primary" onClick={() => openFormModal()}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Create New Form
-              </button>
             </header>
 
             <div className="metrics-grid">
-              <div className="glass-card metric-card">
+              <div className="glass-card metric-card metric-forms">
                 <span className="metric-title">Active Forms</span>
                 <span className="metric-value">{forms.length}</span>
               </div>
-              <div className="glass-card metric-card">
-                <span className="metric-title">Total Submissions</span>
+              <div className="glass-card metric-card metric-subs">
+                <span className="metric-title">Submissions</span>
                 <span className="metric-value">{submissions.length}</span>
               </div>
-              <div className="glass-card metric-card">
-                <span className="metric-title">Alerts Dispatched</span>
+              <div className="glass-card metric-card metric-alerts">
+                <span className="metric-title">Alerts Sent</span>
                 <span className="metric-value">{totalAlertsSent}</span>
               </div>
-              <div className="glass-card metric-card">
-                <span className="metric-title">Payments Received</span>
+              <div className="glass-card metric-card metric-payments">
+                <span className="metric-title">Payments</span>
                 <span className="metric-value" style={{ color: 'var(--success)' }}>{paymentStats.paid_count || 0}</span>
-              </div>
-              <div className="glass-card metric-card">
-                <span className="metric-title">Revenue (INR)</span>
-                <span className="metric-value">{fmtCurrency(paymentStats.revenue_inr, 'INR')}</span>
-              </div>
-              <div className="glass-card metric-card">
-                <span className="metric-title">Revenue (USD)</span>
-                <span className="metric-value">{fmtCurrency(paymentStats.revenue_usd, 'USD')}</span>
               </div>
             </div>
 
-            <div className="glass-card">
-              <h3>Recent Submissions</h3>
-              <div className="table-container">
-                <table>
-                  <thead><tr><th>Date</th><th>Form</th><th>Name</th><th>Email</th><th>Mobile</th><th>Email</th><th>WhatsApp</th></tr></thead>
-                  <tbody>
-                    {submissions.slice(0, 10).map(sub => (
-                      <tr key={sub.id}>
-                        <td>{new Date(sub.created_at).toLocaleString()}</td>
-                        <td><span className="form-meta-tag">{sub.form_slug}</span></td>
-                        <td style={{ fontWeight: '600' }}>{sub.full_name}</td>
-                        <td>{sub.email}</td>
-                        <td>{sub.mobile}</td>
-                        <td><span className={`badge badge-${sub.email_status.toLowerCase()}`}>{sub.email_status}</span></td>
-                        <td><span className={`badge badge-${sub.whatsapp_status.toLowerCase()}`}>{sub.whatsapp_status}</span></td>
-                      </tr>
-                    ))}
-                    {submissions.length === 0 && (
-                      <tr><td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>No submissions received yet.</td></tr>
-                    )}
-                  </tbody>
-                </table>
+            <div className="recent-subs-card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Recent Submissions</h3>
+              <div className="submissions-card-list">
+                {submissions.slice(0, 5).map(sub => (
+                  <div key={sub.id} className="submission-app-card">
+                    <div className="card-top-row">
+                      <span className="form-slug-badge">{sub.form_slug}</span>
+                      <span className="card-date-badge">{new Date(sub.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="card-body-content">
+                      <h4 className="card-name-text">{sub.full_name}</h4>
+                      <div className="card-detail-item">{sub.email}</div>
+                      <div className="card-detail-item">{sub.mobile}</div>
+                    </div>
+                    <div className="card-status-row">
+                      {sub.email_status === 'SUCCESS' && <span className="compact-indicator-badge email-success">📧 Sent</span>}
+                      {sub.whatsapp_status === 'SUCCESS' && <span className="compact-indicator-badge wa-success">💬 Sent</span>}
+                    </div>
+                  </div>
+                ))}
+                {submissions.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)' }}>No submissions received yet.</div>
+                )}
               </div>
             </div>
           </div>
@@ -295,10 +250,10 @@ export default function Dashboard() {
 
         {/* ═══════ FORMS MANAGER ═══════ */}
         {activeTab === 'forms' && (
-          <div>
-            <header>
+          <div className="tab-view-container animated-fade-in">
+            <header className="view-header">
               <div>
-                <h1>Form Manager</h1>
+                <h1 className="view-title">Form Manager</h1>
                 <p className="subtitle">Configure forms and link-level messaging templates</p>
               </div>
               <button className="btn btn-primary" onClick={() => openFormModal()}>
@@ -317,18 +272,18 @@ export default function Dashboard() {
                         <h3 style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{form.name}</h3>
                         <span className="form-meta-tag">slug: {form.slug}</span>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
                         <span className={`badge ${form.email_enabled ? 'badge-success' : 'badge-skipped'}`}>Email</span>
                         <span className={`badge ${form.whatsapp_enabled ? 'badge-success' : 'badge-skipped'}`}>WA</span>
                         <span className={`badge ${form.payment_enabled ? 'badge-paid' : 'badge-skipped'}`}>Pay</span>
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
                       <strong>Active URL:</strong>
-                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', alignItems: 'center' }}>
-                        <input readOnly value={formUrl} className="form-control" style={{ flex: 1, padding: '0.35rem 0.5rem', fontSize: '0.75rem', height: 'auto', background: 'rgba(0,0,0,0.15)' }} />
-                        <button className="btn btn-secondary btn-sm" onClick={() => copyToClipboard(formUrl)} title="Copy URL">Copy</button>
+                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.35rem', alignItems: 'center' }}>
+                        <input readOnly value={formUrl} className="form-control" style={{ flex: 1, padding: '0.4rem 0.65rem', fontSize: '0.75rem', height: 'auto', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#334155', borderRadius: '8px' }} />
+                        <button className="btn btn-secondary btn-sm" onClick={() => copyToClipboard(formUrl)} title="Copy URL">📋</button>
                       </div>
                     </div>
 
@@ -355,139 +310,130 @@ export default function Dashboard() {
 
         {/* ═══════ SUBMISSIONS ═══════ */}
         {activeTab === 'submissions' && (
-          <div>
-            <header>
+          <div className="tab-view-container animated-fade-in">
+            <header className="view-header">
               <div>
-                <h1>Submissions Grid</h1>
+                <h1 className="view-title">Submissions</h1>
                 <p className="subtitle">Customer profiles with payment link actions</p>
               </div>
-              <div style={{ display: 'flex', gap: '1rem', width: '300px' }}>
+              <div style={{ width: '100%', maxWidth: '300px' }}>
                 <input type="text" placeholder="Filter by Form Slug..." className="form-control" value={submissionFilter} onChange={e => setSubmissionFilter(e.target.value)} style={{ width: '100%', padding: '0.5rem 1rem' }} />
               </div>
             </header>
 
-            <div className="glass-card">
-              <div className="table-container">
-                <table>
-                  <thead><tr><th>Date</th><th>Form</th><th>Name</th><th>Email</th><th>Mobile</th><th>Email</th><th>WA</th><th>Action</th></tr></thead>
-                  <tbody>
-                    {submissions
-                      .filter(s => s.form_slug.toLowerCase().includes(submissionFilter.toLowerCase()))
-                      .map(sub => {
-                        const form = forms.find(f => f.slug === sub.form_slug);
-                        const paymentEnabled = form?.payment_enabled === 1;
-                        const existingPayments = payments.filter(p => p.submission_id === sub.id);
-                        const hasPaid = existingPayments.some(p => p.status === 'PAID');
-                        const hasPending = existingPayments.some(p => p.status === 'PENDING' || p.status === 'PROCESSING');
-                        return (
-                          <tr key={sub.id}>
-                            <td>{new Date(sub.created_at).toLocaleString()}</td>
-                            <td><span className="form-meta-tag">{sub.form_slug}</span></td>
-                            <td style={{ fontWeight: '600' }}>{sub.full_name}</td>
-                            <td>{sub.email}</td>
-                            <td>{sub.mobile}</td>
-                            <td><span className={`badge badge-${sub.email_status.toLowerCase()}`}>{sub.email_status}</span></td>
-                            <td><span className={`badge badge-${sub.whatsapp_status.toLowerCase()}`}>{sub.whatsapp_status}</span></td>
-                            <td>
-                              {paymentEnabled ? (
-                                hasPaid ? (
-                                  <span className="badge badge-paid">PAID</span>
-                                ) : hasPending ? (
-                                  <span className="badge badge-pending">PENDING</span>
-                                ) : (
-                                  <button className="btn btn-payment btn-sm" onClick={() => openPayModal(sub)}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                    Send Payment
-                                  </button>
-                                )
-                              ) : (
-                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    {submissions.length === 0 && (
-                      <tr><td colSpan="8" style={{ textAlign: 'center', padding: '2rem' }}>No data records.</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            <div className="submissions-card-list">
+              {submissions
+                .filter(s => s.form_slug.toLowerCase().includes(submissionFilter.toLowerCase()))
+                .map(sub => {
+                  const form = forms.find(f => f.slug === sub.form_slug);
+                  const paymentEnabled = form?.payment_enabled === 1;
+                  const existingPayments = payments.filter(p => p.submission_id === sub.id);
+                  const hasPaid = existingPayments.some(p => p.status === 'PAID');
+                  const hasPending = existingPayments.some(p => p.status === 'PENDING' || p.status === 'PROCESSING');
+                  return (
+                    <div key={sub.id} className="submission-app-card">
+                      <div className="card-top-row">
+                        <span className="form-slug-badge">{sub.form_slug}</span>
+                        <span className="card-date-badge">{new Date(sub.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="card-body-content">
+                        <h4 className="card-name-text">{sub.full_name}</h4>
+                        <div className="card-detail-item">{sub.email} · {sub.mobile}</div>
+                      </div>
+                      <div className="card-status-row" style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          {sub.email_status === 'SUCCESS' && <span className="compact-indicator-badge email-success">📧 Sent</span>}
+                          {sub.whatsapp_status === 'SUCCESS' && <span className="compact-indicator-badge wa-success">💬 Sent</span>}
+                        </div>
+                        <div>
+                          {paymentEnabled ? (
+                            hasPaid ? (
+                              <span className="badge badge-paid">PAID</span>
+                            ) : hasPending ? (
+                              <span className="badge badge-pending">PENDING</span>
+                            ) : (
+                              <button className="btn btn-payment btn-sm" onClick={() => openPayModal(sub)} style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>
+                                💳 Pay
+                              </button>
+                            )
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              {submissions.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', gridColumn: '1/-1' }}>No submissions found.</div>
+              )}
             </div>
           </div>
         )}
 
         {/* ═══════ PAYMENTS ═══════ */}
         {activeTab === 'payments' && (
-          <div>
-            <header>
+          <div className="tab-view-container animated-fade-in">
+            <header className="view-header">
               <div>
-                <h1>Payment Tracker</h1>
+                <h1 className="view-title">Payments</h1>
                 <p className="subtitle">Real-time payment status and revenue analytics</p>
               </div>
-              <button className="btn btn-secondary" onClick={fetchPayments}>Refresh</button>
+              <button className="btn btn-secondary btn-sm" onClick={fetchPayments}>Refresh</button>
             </header>
 
             <div className="metrics-grid">
-              <div className="glass-card metric-card">
+              <div className="glass-card metric-card metric-payments">
                 <span className="metric-title">Total Payments</span>
                 <span className="metric-value">{paymentStats.total || 0}</span>
               </div>
-              <div className="glass-card metric-card">
+              <div className="glass-card metric-card metric-paid">
                 <span className="metric-title">Paid</span>
                 <span className="metric-value" style={{ color: 'var(--success)' }}>{paymentStats.paid_count || 0}</span>
               </div>
-              <div className="glass-card metric-card">
+              <div className="glass-card metric-card metric-pending">
                 <span className="metric-title">Pending</span>
                 <span className="metric-value" style={{ color: '#f59e0b' }}>{paymentStats.pending_count || 0}</span>
               </div>
-              <div className="glass-card metric-card">
+              <div className="glass-card metric-card metric-failed">
                 <span className="metric-title">Failed</span>
                 <span className="metric-value" style={{ color: 'var(--error)' }}>{paymentStats.failed_count || 0}</span>
               </div>
-              <div className="glass-card metric-card">
-                <span className="metric-title">Revenue (INR)</span>
-                <span className="metric-value">{fmtCurrency(paymentStats.revenue_inr, 'INR')}</span>
-              </div>
-              <div className="glass-card metric-card">
-                <span className="metric-title">Revenue (USD)</span>
-                <span className="metric-value">{fmtCurrency(paymentStats.revenue_usd, 'USD')}</span>
-              </div>
             </div>
 
-            <div className="glass-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3>Payment Records</h3>
-                <input type="text" placeholder="Filter..." className="form-control" style={{ width: '200px', padding: '0.4rem 0.8rem' }} value={paymentFilter} onChange={e => setPaymentFilter(e.target.value)} />
+            <div className="glass-card" style={{ border: 'none', background: 'transparent', padding: 0, boxShadow: 'none' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <h3 style={{ margin: 0 }}>Payment Feed</h3>
+                <input type="text" placeholder="Filter..." className="form-control" style={{ width: '180px', padding: '0.4rem 0.8rem' }} value={paymentFilter} onChange={e => setPaymentFilter(e.target.value)} />
               </div>
-              <div className="table-container">
-                <table>
-                  <thead><tr><th>Date</th><th>Form</th><th>Name</th><th>Amount</th><th>Gateway</th><th>Status</th><th>Payment ID</th></tr></thead>
-                  <tbody>
-                    {payments
-                      .filter(p => (p.form_slug + (p.full_name || '') + (p.gateway || '')).toLowerCase().includes(paymentFilter.toLowerCase()))
-                      .map(p => (
-                        <tr key={p.id}>
-                          <td>{new Date(p.created_at).toLocaleString()}</td>
-                          <td><span className="form-meta-tag">{p.form_slug}</span></td>
-                          <td style={{ fontWeight: '600' }}>{p.full_name || '—'}</td>
-                          <td style={{ fontWeight: '600' }}>{fmtCurrency(p.amount, p.currency)}</td>
-                          <td>
-                            {p.gateway ? (
-                              <span className={`badge badge-gateway-${p.gateway}`}>{p.gateway.toUpperCase()}</span>
-                            ) : '—'}
-                          </td>
-                          <td><span className={`badge badge-${p.status.toLowerCase()}`}>{p.status}</span></td>
-                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                            {p.gateway_payment_id ? p.gateway_payment_id.slice(0, 20) + '...' : '—'}
-                          </td>
-                        </tr>
-                      ))}
-                    {payments.length === 0 && (
-                      <tr><td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>No payments recorded yet.</td></tr>
-                    )}
-                  </tbody>
-                </table>
+
+              <div className="payments-card-list">
+                {payments
+                  .filter(p => (p.form_slug + (p.full_name || '') + (p.gateway || '')).toLowerCase().includes(paymentFilter.toLowerCase()))
+                  .map(p => (
+                    <div key={p.id} className="payment-app-card">
+                      <div className="card-top-row">
+                        <span className="form-slug-badge">{p.form_slug}</span>
+                        <span className="card-date-badge">{new Date(p.created_at).toLocaleString()}</span>
+                      </div>
+                      <div className="card-body-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                        <div>
+                          <h4 className="card-name-text">{p.full_name || 'Anonymous'}</h4>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                            {p.gateway_payment_id ? p.gateway_payment_id : 'No Transaction ID'}
+                          </span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div className="payment-amount-display">{fmtCurrency(p.amount, p.currency)}</div>
+                          <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'flex-end', marginTop: '0.4rem', flexWrap: 'wrap' }}>
+                            {p.gateway && <span className={`badge badge-gateway-${p.gateway}`}>{p.gateway.toUpperCase()}</span>}
+                            <span className={`badge badge-${p.status.toLowerCase()}`}>{p.status}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                {payments.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No payments recorded yet.</div>
+                )}
               </div>
             </div>
           </div>
@@ -495,17 +441,16 @@ export default function Dashboard() {
 
         {/* ═══════ SETTINGS ═══════ */}
         {activeTab === 'settings' && (
-          <div>
-            <header>
+          <div className="tab-view-container animated-fade-in">
+            <header className="view-header">
               <div>
-                <h1>Global Settings</h1>
+                <h1 className="view-title">Settings</h1>
                 <p className="subtitle">SMTP, WhatsApp, Razorpay & PayPal credentials</p>
               </div>
             </header>
 
             <form onSubmit={handleSaveSettings} className="settings-section">
               <div className="settings-grid">
-                {/* SMTP */}
                 <div className="glass-card">
                   <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: 'var(--accent-purple)' }}>Gmail SMTP</h3>
                   <div className="form-group">
@@ -519,80 +464,72 @@ export default function Dashboard() {
                   <div className="form-group"><label>SMTP User</label><input type="email" placeholder="example@gmail.com" required className="form-control" value={settings.smtp_user} onChange={e => setSettings({...settings, smtp_user: e.target.value})} /></div>
                   <div className="form-group"><label>App Password</label><input type="password" placeholder="••••••••" required className="form-control" value={settings.smtp_pass} onChange={e => setSettings({...settings, smtp_pass: e.target.value})} /></div>
                 </div>
-
-                {/* WhatsApp */}
                 <div className="glass-card">
                   <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: 'var(--accent-cyan)' }}>Meta WhatsApp API</h3>
                   <div className="form-group"><label>Access Token</label><input type="password" placeholder="EAABw..." required className="form-control" value={settings.whatsapp_token} onChange={e => setSettings({...settings, whatsapp_token: e.target.value})} /></div>
                   <div className="form-group"><label>Phone Number ID</label><input type="text" placeholder="102573..." required className="form-control" value={settings.whatsapp_phone_number_id} onChange={e => setSettings({...settings, whatsapp_phone_number_id: e.target.value})} /></div>
                 </div>
-
-                {/* Razorpay */}
-                <div className="glass-card">
-                  <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: '#3b82f6' }}>Razorpay Gateway</h3>
-                  <div className="form-group"><label>Key ID</label><input type="text" placeholder="rzp_live_..." className="form-control" value={settings.razorpay_key_id} onChange={e => setSettings({...settings, razorpay_key_id: e.target.value})} /></div>
-                  <div className="form-group"><label>Key Secret</label><input type="password" placeholder="••••••••" className="form-control" value={settings.razorpay_key_secret} onChange={e => setSettings({...settings, razorpay_key_secret: e.target.value})} /></div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                    <p>UPI payments are processed through Razorpay. Enable UPI on individual forms.</p>
-                  </div>
-                </div>
-
-                {/* PayPal */}
-                <div className="glass-card">
-                  <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: '#0070ba' }}>PayPal Gateway</h3>
-                  <div className="form-group"><label>Client ID</label><input type="text" placeholder="AW..." className="form-control" value={settings.paypal_client_id} onChange={e => setSettings({...settings, paypal_client_id: e.target.value})} /></div>
-                  <div className="form-group"><label>Client Secret</label><input type="password" placeholder="••••••••" className="form-control" value={settings.paypal_client_secret} onChange={e => setSettings({...settings, paypal_client_secret: e.target.value})} /></div>
-                  <div className="form-group">
-                    <label>Mode</label>
-                    <select className="form-control" value={settings.paypal_mode} onChange={e => setSettings({...settings, paypal_mode: e.target.value})}>
-                      <option value="sandbox">Sandbox (Testing)</option>
-                      <option value="live">Live (Production)</option>
-                    </select>
-                  </div>
-                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                   {loading ? 'Saving...' : 'Save All Settings'}
                 </button>
               </div>
             </form>
-          </div>
-        )}
 
-        {/* ═══════ LOGS ═══════ */}
-        {activeTab === 'logs' && (
-          <div>
-            <header>
-              <div>
-                <h1>Audit System Logs</h1>
-                <p className="subtitle">Backend event tracking for mail, WhatsApp & payments</p>
+            {/* Embedded System Audit Logs */}
+            <div className="glass-card" style={{ marginTop: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
+                <h3 style={{ color: 'var(--accent-cyan)' }}>System Audit Logs</h3>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={fetchLogs}>Refresh Logs</button>
               </div>
-              <button className="btn btn-secondary" onClick={fetchLogs}>Refresh</button>
-            </header>
-
-            <div className="glass-card" style={{ fontFamily: 'monospace', background: '#03050a', border: '1px solid rgba(255,255,255,0.05)', color: '#38bdf8' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '500px', overflowY: 'auto', padding: '0.5rem' }}>
-                {logs.map(log => (
-                  <div key={log.id} style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.4rem', fontSize: '0.85rem' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <span className="form-meta-tag" style={{ border: 'none', background: 'rgba(255,255,255,0.05)' }}>{log.form_slug}</span>
-                    <span style={{ color: log.event_type === 'EMAIL' ? 'var(--accent-purple)' : log.event_type === 'WHATSAPP' ? 'var(--accent-cyan)' : log.event_type === 'PAYMENT' ? '#f59e0b' : 'var(--text-primary)', fontWeight: '600' }}>
-                      {log.event_type}
-                    </span>
-                    <span className={`badge badge-${log.status.toLowerCase()}`} style={{ padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{log.status}</span>
-                    <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{log.message}</span>
-                  </div>
-                ))}
-                {logs.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No logs yet.</div>
-                )}
+              <div style={{ fontFamily: 'monospace', background: '#03050a', border: '1px solid rgba(255,255,255,0.05)', color: '#38bdf8', borderRadius: '8px', padding: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '300px', overflowY: 'auto' }}>
+                  {logs.map(log => (
+                    <div key={log.id} style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.4rem', fontSize: '0.8rem', flexWrap: 'wrap' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>{new Date(log.timestamp).toLocaleTimeString()}</span>
+                      <span className="form-meta-tag" style={{ border: 'none', background: 'rgba(255,255,255,0.05)', padding: '0.1rem 0.3rem' }}>{log.form_slug}</span>
+                      <span style={{ color: log.event_type === 'EMAIL' ? 'var(--accent-purple)' : log.event_type === 'WHATSAPP' ? 'var(--accent-cyan)' : log.event_type === 'PAYMENT' ? '#f59e0b' : 'var(--text-primary)', fontWeight: '600' }}>
+                        {log.event_type}
+                      </span>
+                      <span className={`badge badge-${log.status.toLowerCase()}`} style={{ padding: '0.05rem 0.3rem', borderRadius: '4px', fontSize: '0.7rem' }}>{log.status}</span>
+                      <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{log.message}</span>
+                    </div>
+                  ))}
+                  {logs.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)' }}>No logs yet.</div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      {/* Sticky Bottom Navigation Bar */}
+      <nav className="bottom-nav">
+        <div className={`bottom-nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => { setActiveTab('overview'); fetchSubmissions(); fetchPayments(); }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          <span>Overview</span>
+        </div>
+        <div className={`bottom-nav-item ${activeTab === 'forms' ? 'active' : ''}`} onClick={() => { setActiveTab('forms'); fetchForms(); }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Forms</span>
+        </div>
+        <div className={`bottom-nav-item ${activeTab === 'submissions' ? 'active' : ''}`} onClick={() => { setActiveTab('submissions'); fetchSubmissions(); }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Submissions</span>
+        </div>
+        <div className={`bottom-nav-item ${activeTab === 'payments' ? 'active' : ''}`} onClick={() => { setActiveTab('payments'); fetchPayments(); }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <span>Payments</span>
+        </div>
+        <div className={`bottom-nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); fetchSettings(); }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </div>
+      </nav>
 
       {/* ═══════ FORM EDITOR MODAL ═══════ */}
       {modalOpen && (
@@ -641,14 +578,6 @@ export default function Dashboard() {
                         Placeholders: <span className="var-tag">&#123;name&#125;</span> <span className="var-tag">&#123;email&#125;</span> <span className="var-tag">&#123;mobile&#125;</span> <span className="var-tag">&#123;form_name&#125;</span> <span className="var-tag">&#123;payment_link&#125;</span>
                       </div>
                     </div>
-                    <div style={{ marginTop: '0.75rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.75rem' }}>
-                      <h5 style={{ marginBottom: '0.75rem', color: 'var(--accent-purple)', fontSize: '0.9rem', fontWeight: '600' }}>SMTP Override (Optional)</h5>
-                      <div className="form-row">
-                        <div className="form-group" style={{ marginBottom: 0 }}><label>Sender Name</label><input type="text" placeholder="Sales Team" className="form-control" value={formData.smtp_from_name} onChange={e => setFormData({...formData, smtp_from_name: e.target.value})} /></div>
-                        <div className="form-group" style={{ marginBottom: 0 }}><label>Sender Email</label><input type="email" placeholder="sales@co.com" className="form-control" value={formData.smtp_user} onChange={e => setFormData({...formData, smtp_user: e.target.value})} /></div>
-                      </div>
-                      <div className="form-group" style={{ marginTop: '0.75rem', marginBottom: 0 }}><label>SMTP Password</label><input type="password" placeholder="Leave empty for global" className="form-control" value={formData.smtp_pass} onChange={e => setFormData({...formData, smtp_pass: e.target.value})} /></div>
-                    </div>
                   </div>
                 )}
               </div>
@@ -678,24 +607,13 @@ export default function Dashboard() {
                           <option value="template">Approved Template</option>
                         </select>
                       </div>
-                      {formData.whatsapp_mode === 'template' && (
-                        <div className="form-group" style={{ marginBottom: 0 }}><label>Language Code</label><input type="text" placeholder="en_US" className="form-control" value={formData.whatsapp_language_code} onChange={e => setFormData({...formData, whatsapp_language_code: e.target.value})} /></div>
-                      )}
                     </div>
-                    {formData.whatsapp_mode === 'template' && (
-                      <div className="form-group" style={{ marginBottom: 0 }}><label>Template Name</label><input type="text" placeholder="welcome_leads" required className="form-control" value={formData.whatsapp_template_name} onChange={e => setFormData({...formData, whatsapp_template_name: e.target.value})} /></div>
-                    )}
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>{formData.whatsapp_mode === 'template' ? 'Template Body Preview' : 'Message Body'}</label>
+                      <label>Message Body</label>
                       <textarea placeholder="Hi {name}! Payment: {payment_link}" required className="form-control" value={formData.whatsapp_body} onChange={e => setFormData({...formData, whatsapp_body: e.target.value})} />
                       <div className="variables-helper">
                         Placeholders: <span className="var-tag">&#123;name&#125;</span> <span className="var-tag">&#123;email&#125;</span> <span className="var-tag">&#123;mobile&#125;</span> <span className="var-tag">&#123;form_name&#125;</span> <span className="var-tag">&#123;payment_link&#125;</span>
                       </div>
-                    </div>
-                    <div style={{ marginTop: '0.75rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.75rem' }}>
-                      <h5 style={{ marginBottom: '0.75rem', color: 'var(--accent-cyan)', fontSize: '0.9rem', fontWeight: '600' }}>WhatsApp Override (Optional)</h5>
-                      <div className="form-group" style={{ marginBottom: 0 }}><label>Access Token</label><input type="password" placeholder="Global token" className="form-control" value={formData.whatsapp_token} onChange={e => setFormData({...formData, whatsapp_token: e.target.value})} /></div>
-                      <div className="form-group" style={{ marginTop: '0.75rem', marginBottom: 0 }}><label>Phone Number ID</label><input type="text" placeholder="102573..." className="form-control" value={formData.whatsapp_phone_number_id} onChange={e => setFormData({...formData, whatsapp_phone_number_id: e.target.value})} /></div>
                     </div>
                   </div>
                 )}
@@ -706,10 +624,10 @@ export default function Dashboard() {
                 <div className="toggle-header" onClick={() => setPaymentExpanded(!paymentExpanded)} style={{ cursor: 'pointer', userSelect: 'none' }}>
                   <div>
                     <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span>💳 Payment Collection</span>
+                      <span>Accept Payments</span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', transition: 'transform 0.2s', transform: paymentExpanded ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
                     </h4>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Enable sending payment links to submissions</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Configure payment link options</span>
                   </div>
                   <label className="switch" onClick={e => e.stopPropagation()}>
                     <input type="checkbox" checked={formData.payment_enabled === 1} onChange={e => { setFormData({...formData, payment_enabled: e.target.checked ? 1 : 0}); if (e.target.checked) setPaymentExpanded(true); }} />
@@ -717,34 +635,35 @@ export default function Dashboard() {
                   </label>
                 </div>
                 {paymentExpanded && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Payment Amount</label>
-                      <input type="number" step="0.01" min="0" placeholder="0.00" className="form-control" value={formData.payment_amount} onChange={e => setFormData({...formData, payment_amount: parseFloat(e.target.value) || 0})} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+                    <div className="form-row">
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label>Default Currency</label>
+                        <select className="form-control" value={formData.payment_currency} onChange={e => setFormData({...formData, payment_currency: e.target.value})}>
+                          <option value="INR">₹ INR</option>
+                          <option value="USD">$ USD</option>
+                        </select>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label>Amount</label>
+                        <input type="number" step="0.01" min="0" placeholder="0.00" className="form-control" value={formData.payment_amount} onChange={e => setFormData({...formData, payment_amount: parseFloat(e.target.value) || 0.0})} />
+                      </div>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Default Currency</label>
-                      <select className="form-control" value={formData.payment_currency} onChange={e => setFormData({...formData, payment_currency: e.target.value})}>
-                        <option value="INR">INR (₹ Indian Rupee)</option>
-                        <option value="USD">USD ($ US Dollar)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.75rem', display: 'block' }}>Payment Gateways</label>
-                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div className="form-group" style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                      <label>Gateways Enabled</label>
+                      <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                         <label className="gateway-checkbox">
                           <input type="checkbox" checked={formData.razorpay_enabled === 1} onChange={e => setFormData({...formData, razorpay_enabled: e.target.checked ? 1 : 0})} />
                           <span className="gateway-check-label">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                            Razorpay <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>(INR + USD)</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                            Razorpay <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>(INR only)</span>
                           </span>
                         </label>
                         <label className="gateway-checkbox">
                           <input type="checkbox" checked={formData.upi_enabled === 1} onChange={e => setFormData({...formData, upi_enabled: e.target.checked ? 1 : 0})} />
                           <span className="gateway-check-label">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                             UPI <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>(INR only)</span>
                           </span>
                         </label>
@@ -756,10 +675,6 @@ export default function Dashboard() {
                           </span>
                         </label>
                       </div>
-                    </div>
-
-                    <div style={{ padding: '0.75rem', background: 'rgba(59,130,246,0.05)', borderRadius: '8px', border: '1px solid rgba(59,130,246,0.15)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      <strong style={{ color: 'var(--text-primary)' }}>How it works:</strong> After a form is submitted, go to <em>Submissions</em> tab → click <em>"Send Payment"</em> → enter amount → payment link is sent via email/WhatsApp using the <code>&#123;payment_link&#125;</code> placeholder.
                     </div>
                   </div>
                 )}
