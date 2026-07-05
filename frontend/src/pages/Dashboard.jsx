@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [payments, setPayments] = useState([]);
   const [paymentStats, setPaymentStats] = useState({});
   const [settings, setSettings] = useState({
+    resend_api_key: '', resend_from_email: '',
     smtp_host: '', smtp_port: '', smtp_user: '', smtp_pass: '', smtp_from_name: '',
     whatsapp_token: '', whatsapp_phone_number_id: '',
     razorpay_key_id: '', razorpay_key_secret: '',
@@ -461,17 +462,24 @@ export default function Dashboard() {
             <form onSubmit={handleSaveSettings} className="settings-section">
               <div className="settings-grid">
                 <div className="glass-card">
-                  <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: 'var(--accent-purple)' }}>Gmail SMTP</h3>
+                  <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: '#22c55e' }}>✉️ Resend Email API <span style={{ fontSize: '0.7rem', background: '#22c55e20', color: '#22c55e', padding: '2px 8px', borderRadius: '6px', marginLeft: '8px' }}>Recommended</span></h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Works on Vercel/AWS. Get a free key at <a href="https://resend.com" target="_blank" rel="noreferrer" style={{ color: '#22c55e' }}>resend.com</a></p>
+                  <div className="form-group"><label>Resend API Key</label><input type="password" placeholder="re_xxxxxxxxx" className="form-control" disabled={!isSettingsEditing} value={settings.resend_api_key || ''} onChange={e => setSettings({...settings, resend_api_key: e.target.value})} /></div>
+                  <div className="form-group"><label>From Email</label><input type="text" placeholder="CMS <noreply@yourdomain.com>" className="form-control" disabled={!isSettingsEditing} value={settings.resend_from_email || ''} onChange={e => setSettings({...settings, resend_from_email: e.target.value})} /></div>
+                </div>
+
+                <div className="glass-card">
+                  <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem', color: 'var(--accent-purple)' }}>Gmail SMTP <span style={{ fontSize: '0.7rem', background: 'rgba(0,0,0,0.05)', color: 'var(--text-muted)', padding: '2px 8px', borderRadius: '6px', marginLeft: '8px' }}>Fallback</span></h3>
                   <div className="form-group">
                     <label>SMTP Host</label>
-                    <input type="text" placeholder="smtp.gmail.com" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_host || ''} onChange={e => setSettings({...settings, smtp_host: e.target.value})} />
+                    <input type="text" placeholder="smtp.gmail.com" className="form-control" disabled={!isSettingsEditing} value={settings.smtp_host || ''} onChange={e => setSettings({...settings, smtp_host: e.target.value})} />
                   </div>
                   <div className="form-row">
-                    <div className="form-group"><label>SMTP Port</label><input type="text" placeholder="465" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_port || ''} onChange={e => setSettings({...settings, smtp_port: e.target.value})} /></div>
+                    <div className="form-group"><label>SMTP Port</label><input type="text" placeholder="465" className="form-control" disabled={!isSettingsEditing} value={settings.smtp_port || ''} onChange={e => setSettings({...settings, smtp_port: e.target.value})} /></div>
                     <div className="form-group"><label>Sender Name</label><input type="text" placeholder="Acme CMS" className="form-control" disabled={!isSettingsEditing} value={settings.smtp_from_name || ''} onChange={e => setSettings({...settings, smtp_from_name: e.target.value})} /></div>
                   </div>
-                  <div className="form-group"><label>SMTP User</label><input type="email" placeholder="example@gmail.com" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_user || ''} onChange={e => setSettings({...settings, smtp_user: e.target.value})} /></div>
-                  <div className="form-group"><label>App Password</label><input type="password" placeholder="••••••••" required className="form-control" disabled={!isSettingsEditing} value={settings.smtp_pass || ''} onChange={e => setSettings({...settings, smtp_pass: e.target.value})} /></div>
+                  <div className="form-group"><label>SMTP User</label><input type="email" placeholder="example@gmail.com" className="form-control" disabled={!isSettingsEditing} value={settings.smtp_user || ''} onChange={e => setSettings({...settings, smtp_user: e.target.value})} /></div>
+                  <div className="form-group"><label>App Password</label><input type="password" placeholder="••••••••" className="form-control" disabled={!isSettingsEditing} value={settings.smtp_pass || ''} onChange={e => setSettings({...settings, smtp_pass: e.target.value})} /></div>
                 </div>
                 
                 <div className="glass-card">

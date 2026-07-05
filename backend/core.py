@@ -658,25 +658,59 @@ class BaseNotifier:
 
 
 class EmailNotifier(BaseNotifier):
-    """OOP implementation of clean text-only Email sender via SMTP."""
+    """Email sender that uses Resend API (recommended for production) or falls back to SMTP."""
     def send(self, recipient, submission, form_config, settings):
+        resend_api_key = settings.get("resend_api_key", "")
+        resend_from = settings.get("resend_from_email", "")
+
+        subject = self.interpolate(form_config["email_subject"], submission)
+        body = self.interpolate(form_config["email_body"], submission)
+
+        # ── Try Resend API first (works on Vercel/AWS - uses HTTPS) ──
+        if resend_api_key and resend_from:
+            return self._send_via_resend(resend_api_key, resend_from, recipient, subject, body)
+
+        # ── Fallback to SMTP (works on localhost, blocked on most serverless) ──
+        return self._send_via_smtp(recipient, subject, body, form_config, settings)
+
+    def _send_via_resend(self, api_key, from_email, recipient, subject, body):
+        try:
+            response = httpx.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": from_email,
+                    "to": [recipient],
+                    "subject": subject,
+                    "text": body
+                },
+                timeout=15
+            )
+            if response.status_code in (200, 201):
+                return "SUCCESS", f"Email sent to {recipient} via Resend"
+            else:
+                error_detail = response.json().get("message", response.text)
+                return "FAILED", f"Resend API Error ({response.status_code}): {error_detail}"
+        except Exception as e:
+            return "FAILED", f"Resend Error: {str(e)}"
+
+    def _send_via_smtp(self, recipient, subject, body, form_config, settings):
         host = form_config.get("smtp_host") or settings.get("smtp_host")
         port = form_config.get("smtp_port") or settings.get("smtp_port")
         user = form_config.get("smtp_user") or settings.get("smtp_user")
         pwd = form_config.get("smtp_pass") or settings.get("smtp_pass")
         from_name = form_config.get("smtp_from_name") or settings.get("smtp_from_name", "CMS Admin")
 
-        # Clean credentials to avoid whitespace/copy-paste errors
         if user:
             user = user.strip()
         if pwd:
             pwd = pwd.replace(" ", "")
 
         if not all([host, port, user, pwd]):
-            return "FAILED", "SMTP credentials missing in Global Settings"
-
-        subject = self.interpolate(form_config["email_subject"], submission)
-        body = self.interpolate(form_config["email_body"], submission)
+            return "FAILED", "Email credentials missing. Add a Resend API Key (recommended) or SMTP settings in Global Settings."
 
         try:
             msg = MIMEText(body, "plain", "utf-8")
@@ -694,13 +728,11 @@ class EmailNotifier(BaseNotifier):
                     server.starttls()
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
-            return "SUCCESS", f"Email successfully sent to {recipient}"
-        except TimeoutError:
-            return "FAILED", "SMTP Error: Connection Timed Out. (Note: Gmail blocks Vercel/AWS IPs. Use Resend/Sendgrid instead)."
+            return "SUCCESS", f"Email sent to {recipient} via SMTP"
         except Exception as e:
             err_msg = str(e)
-            if "Network is unreachable" in err_msg:
-                err_msg += " (Vercel/AWS blocked the connection to Gmail. You must use an Email API like Resend, Sendgrid, or Mailgun)."
+            if "timed out" in err_msg or "Network is unreachable" in err_msg:
+                err_msg += " — SMTP is blocked on this server. Please use Resend API instead (add Resend API Key in Settings)."
             return "FAILED", f"SMTP Error: {err_msg}"
 
 
