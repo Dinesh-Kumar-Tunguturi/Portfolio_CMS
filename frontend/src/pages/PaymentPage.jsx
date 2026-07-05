@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 const USD_TO_INR_RATE = 83.0;
 
 export default function PaymentPage({ token }) {
