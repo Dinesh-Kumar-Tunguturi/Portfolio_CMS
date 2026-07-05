@@ -144,9 +144,9 @@ body {
 
 .nav-indicator-inner {
   position: absolute;
-  top: -25px;
-  width: 70px;
-  height: 70px;
+  top: -18px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: #1c1c1e;
   display: flex;
@@ -155,8 +155,8 @@ body {
 }
 
 .nav-indicator-green {
-  width: 54px;
-  height: 54px;
+  width: 42px;
+  height: 42px;
   background: #00ff41;
   border-radius: 50%;
 }
@@ -165,21 +165,21 @@ body {
 .nav-indicator-inner::after {
   content: "";
   position: absolute;
-  top: 25px;
-  width: 22px;
-  height: 22px;
+  top: 18px;
+  width: 16px;
+  height: 16px;
   background: transparent;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
 .nav-indicator-inner::before {
-  left: -21px;
-  background: radial-gradient(circle at top left, transparent 21px, #1c1c1e 22px);
+  left: -15px;
+  background: radial-gradient(circle at top left, transparent 15px, #1c1c1e 16px);
 }
 .nav-indicator-inner::after {
-  right: -21px;
-  background: radial-gradient(circle at top right, transparent 21px, #1c1c1e 22px);
+  right: -15px;
+  background: radial-gradient(circle at top right, transparent 15px, #1c1c1e 16px);
 }
 
 /* Fix the bad black div issue on edges */
@@ -206,10 +206,10 @@ body {
 
 .bottom-nav-item.active svg {
   margin: 0;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   stroke: #1c1c1e;
-  transform: translateY(-22px);
+  transform: translateY(-16px);
 }
 
 .bottom-nav-item.active span {
