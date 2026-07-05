@@ -5,8 +5,13 @@ import sqlite3
 import smtplib
 from email.mime.text import MIMEText
 import httpx
+from contextlib import contextmanager
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
+if "VERCEL" in os.environ:
+    DB_PATH = "/tmp/database.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
+
 
 class SQLiteDatabase:
     """Object-Oriented Manager for database operations using SQLite."""
@@ -306,6 +311,335 @@ class SQLiteDatabase:
     def get_logs(self):
         with self._get_connection() as conn:
             return [dict(row) for row in conn.execute("SELECT * FROM logs ORDER BY id DESC LIMIT 500").fetchall()]
+
+
+class PostgreSQLDatabase:
+    """Object-Oriented Manager for database operations using PostgreSQL."""
+    def __init__(self, dsn):
+        try:
+            global psycopg2
+            import psycopg2
+        except ImportError:
+            raise ImportError(
+                "psycopg2 is required to connect to PostgreSQL. Please install psycopg2-binary."
+            )
+        self.dsn = dsn
+        self._initialize_db()
+
+    def _get_connection(self):
+        return psycopg2.connect(self.dsn)
+
+    @contextmanager
+    def _get_cursor(self):
+        conn = self._get_connection()
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    yield cur
+        finally:
+            conn.close()
+
+    def _initialize_db(self):
+        with self._get_cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS forms (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    slug TEXT NOT NULL UNIQUE,
+                    email_enabled INTEGER DEFAULT 0,
+                    email_subject TEXT,
+                    email_body TEXT,
+                    whatsapp_enabled INTEGER DEFAULT 0,
+                    whatsapp_mode TEXT DEFAULT 'text',
+                    whatsapp_body TEXT,
+                    whatsapp_template_name TEXT,
+                    whatsapp_language_code TEXT DEFAULT 'en_US',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS submissions (
+                    id SERIAL PRIMARY KEY,
+                    form_slug TEXT NOT NULL,
+                    full_name TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    mobile TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    email_status TEXT DEFAULT 'Skipped',
+                    whatsapp_status TEXT DEFAULT 'Skipped'
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS logs (
+                    id SERIAL PRIMARY KEY,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    form_slug TEXT,
+                    event_type TEXT,
+                    status TEXT,
+                    message TEXT
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS payments (
+                    id SERIAL PRIMARY KEY,
+                    payment_token TEXT NOT NULL UNIQUE,
+                    submission_id INTEGER NOT NULL,
+                    form_slug TEXT NOT NULL,
+                    amount REAL NOT NULL,
+                    currency TEXT NOT NULL DEFAULT 'INR',
+                    status TEXT NOT NULL DEFAULT 'PENDING',
+                    gateway TEXT,
+                    gateway_order_id TEXT,
+                    gateway_payment_id TEXT,
+                    gateway_signature TEXT,
+                    payer_email TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    paid_at TIMESTAMP,
+                    FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE
+                )
+            """)
+            
+            # Dynamic columns overrides
+            overrides = {
+                "smtp_host": "TEXT",
+                "smtp_port": "TEXT",
+                "smtp_user": "TEXT",
+                "smtp_pass": "TEXT",
+                "smtp_from_name": "TEXT",
+                "whatsapp_token": "TEXT",
+                "whatsapp_phone_number_id": "TEXT",
+                "payment_enabled": "INTEGER DEFAULT 0",
+                "payment_amount": "REAL DEFAULT 0",
+                "payment_currency": "TEXT DEFAULT 'INR'",
+                "razorpay_enabled": "INTEGER DEFAULT 0",
+                "paypal_enabled": "INTEGER DEFAULT 0",
+                "upi_enabled": "INTEGER DEFAULT 0",
+            }
+            for col, col_type in overrides.items():
+                cur.execute(f"ALTER TABLE forms ADD COLUMN IF NOT EXISTS {col} {col_type}")
+
+    def _to_dict(self, cursor, row):
+        if row is None:
+            return None
+        return {col[0]: val for col, val in zip(cursor.description, row)}
+
+    def _to_dicts(self, cursor, rows):
+        cols = [col[0] for col in cursor.description]
+        return [{cols[i]: val for i, val in enumerate(row)} for row in rows]
+
+    # Form CRUD Operations
+    def get_forms(self):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT * FROM forms ORDER BY id DESC")
+            return self._to_dicts(cur, cur.fetchall())
+
+    def get_form_by_slug(self, slug):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT * FROM forms WHERE slug = %s", (slug,))
+            row = cur.fetchone()
+            return self._to_dict(cur, row)
+
+    def create_form(self, data):
+        with self._get_cursor() as cur:
+            cur.execute("""
+                INSERT INTO forms (
+                    name, slug, email_enabled, email_subject, email_body,
+                    whatsapp_enabled, whatsapp_mode, whatsapp_body,
+                    whatsapp_template_name, whatsapp_language_code,
+                    smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from_name,
+                    whatsapp_token, whatsapp_phone_number_id,
+                    payment_enabled, payment_amount, payment_currency,
+                    razorpay_enabled, paypal_enabled, upi_enabled
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (
+                data["name"], data["slug"], data.get("email_enabled", 0),
+                data.get("email_subject", ""), data.get("email_body", ""),
+                data.get("whatsapp_enabled", 0), data.get("whatsapp_mode", "text"),
+                data.get("whatsapp_body", ""), data.get("whatsapp_template_name", ""),
+                data.get("whatsapp_language_code", "en_US"),
+                data.get("smtp_host", ""), data.get("smtp_port", ""),
+                data.get("smtp_user", ""), data.get("smtp_pass", ""),
+                data.get("smtp_from_name", ""), data.get("whatsapp_token", ""),
+                data.get("whatsapp_phone_number_id", ""),
+                data.get("payment_enabled", 0), data.get("payment_amount", 0.0), data.get("payment_currency", "INR"),
+                data.get("razorpay_enabled", 0), data.get("paypal_enabled", 0),
+                data.get("upi_enabled", 0)
+            ))
+            return cur.fetchone()[0]
+
+    def update_form(self, form_id, data):
+        with self._get_cursor() as cur:
+            cur.execute("""
+                UPDATE forms SET
+                    name = %s, slug = %s, email_enabled = %s, email_subject = %s, email_body = %s,
+                    whatsapp_enabled = %s, whatsapp_mode = %s, whatsapp_body = %s,
+                    whatsapp_template_name = %s, whatsapp_language_code = %s,
+                    smtp_host = %s, smtp_port = %s, smtp_user = %s, smtp_pass = %s, smtp_from_name = %s,
+                    whatsapp_token = %s, whatsapp_phone_number_id = %s,
+                    payment_enabled = %s, payment_amount = %s, payment_currency = %s,
+                    razorpay_enabled = %s, paypal_enabled = %s, upi_enabled = %s
+                WHERE id = %s
+            """, (
+                data["name"], data["slug"], data.get("email_enabled", 0),
+                data.get("email_subject", ""), data.get("email_body", ""),
+                data.get("whatsapp_enabled", 0), data.get("whatsapp_mode", "text"),
+                data.get("whatsapp_body", ""), data.get("whatsapp_template_name", ""),
+                data.get("whatsapp_language_code", "en_US"),
+                data.get("smtp_host", ""), data.get("smtp_port", ""),
+                data.get("smtp_user", ""), data.get("smtp_pass", ""),
+                data.get("smtp_from_name", ""), data.get("whatsapp_token", ""),
+                data.get("whatsapp_phone_number_id", ""),
+                data.get("payment_enabled", 0), data.get("payment_amount", 0.0), data.get("payment_currency", "INR"),
+                data.get("razorpay_enabled", 0), data.get("paypal_enabled", 0),
+                data.get("upi_enabled", 0), form_id
+            ))
+
+    def delete_form(self, form_id):
+        with self._get_cursor() as cur:
+            cur.execute("DELETE FROM forms WHERE id = %s", (form_id,))
+
+    # Submission Operations
+    def create_submission(self, form_slug, full_name, email, mobile):
+        with self._get_cursor() as cur:
+            cur.execute("""
+                INSERT INTO submissions (form_slug, full_name, email, mobile)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, (form_slug, full_name, email, mobile))
+            return cur.fetchone()[0]
+
+    def update_submission_status(self, sub_id, email_status=None, whatsapp_status=None):
+        with self._get_cursor() as cur:
+            if email_status:
+                cur.execute("UPDATE submissions SET email_status = %s WHERE id = %s", (email_status, sub_id))
+            if whatsapp_status:
+                cur.execute("UPDATE submissions SET whatsapp_status = %s WHERE id = %s", (whatsapp_status, sub_id))
+
+    def get_submissions(self):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT * FROM submissions ORDER BY id DESC")
+            return self._to_dicts(cur, cur.fetchall())
+
+    def get_submission_by_id(self, sub_id):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT * FROM submissions WHERE id = %s", (sub_id,))
+            row = cur.fetchone()
+            return self._to_dict(cur, row)
+
+    # Payment Operations
+    def create_payment(self, submission_id, form_slug, amount, currency):
+        token = str(uuid.uuid4())
+        with self._get_cursor() as cur:
+            cur.execute("""
+                INSERT INTO payments (payment_token, submission_id, form_slug, amount, currency, status)
+                VALUES (%s, %s, %s, %s, %s, 'PENDING')
+            """, (token, submission_id, form_slug, amount, currency))
+        return token
+
+    def get_payment_by_token(self, token):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT * FROM payments WHERE payment_token = %s", (token,))
+            row = cur.fetchone()
+            return self._to_dict(cur, row)
+
+    def get_payments_by_submission(self, submission_id):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT * FROM payments WHERE submission_id = %s ORDER BY id DESC", (submission_id,))
+            return self._to_dicts(cur, cur.fetchall())
+
+    def update_payment_status(self, token, status, gateway=None, gateway_order_id=None,
+                               gateway_payment_id=None, gateway_signature=None, payer_email=None):
+        fields = ["status = %s"]
+        params = [status]
+        if gateway:
+            fields.append("gateway = %s"); params.append(gateway)
+        if gateway_order_id:
+            fields.append("gateway_order_id = %s"); params.append(gateway_order_id)
+        if gateway_payment_id:
+            fields.append("gateway_payment_id = %s"); params.append(gateway_payment_id)
+        if gateway_signature:
+            fields.append("gateway_signature = %s"); params.append(gateway_signature)
+        if payer_email:
+            fields.append("payer_email = %s"); params.append(payer_email)
+        if status == "PAID":
+            fields.append("paid_at = CURRENT_TIMESTAMP")
+        params.append(token)
+        with self._get_cursor() as cur:
+            cur.execute(f"UPDATE payments SET {', '.join(fields)} WHERE payment_token = %s", params)
+
+    def get_payments(self):
+        with self._get_cursor() as cur:
+            cur.execute("""
+                SELECT p.*, s.full_name, s.email, s.mobile
+                FROM payments p
+                LEFT JOIN submissions s ON p.submission_id = s.id
+                ORDER BY p.id DESC
+            """)
+            return self._to_dicts(cur, cur.fetchall())
+
+    def get_payment_stats(self):
+        with self._get_cursor() as cur:
+            cur.execute("""
+                SELECT
+                    COUNT(*) as total,
+                    COALESCE(SUM(CASE WHEN status = 'PAID' THEN 1 ELSE 0 END), 0) as paid_count,
+                    COALESCE(SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END), 0) as pending_count,
+                    COALESCE(SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END), 0) as failed_count,
+                    COALESCE(SUM(CASE WHEN status = 'PAID' THEN amount ELSE 0 END), 0.0) as total_revenue,
+                    COALESCE(SUM(CASE WHEN status = 'PAID' AND currency = 'INR' THEN amount ELSE 0 END), 0.0) as revenue_inr,
+                    COALESCE(SUM(CASE WHEN status = 'PAID' AND currency = 'USD' THEN amount ELSE 0 END), 0.0) as revenue_usd
+                FROM payments
+            """)
+            row = cur.fetchone()
+            return self._to_dict(cur, row)
+
+    # Global Settings Operations
+    def get_settings(self):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT key, value FROM settings")
+            rows = cur.fetchall()
+            return {row[0]: row[1] for row in rows}
+
+    def save_settings(self, settings_dict):
+        with self._get_cursor() as cur:
+            for k, v in settings_dict.items():
+                cur.execute("""
+                    INSERT INTO settings (key, value) VALUES (%s, %s)
+                    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+                """, (k, v))
+
+    # System Logs Operations
+    def log(self, form_slug, event_type, status, message):
+        with self._get_cursor() as cur:
+            cur.execute("""
+                INSERT INTO logs (form_slug, event_type, status, message)
+                VALUES (%s, %s, %s, %s)
+            """, (form_slug, event_type, status, message))
+
+    def get_logs(self):
+        with self._get_cursor() as cur:
+            cur.execute("SELECT * FROM logs ORDER BY id DESC LIMIT 500")
+            return self._to_dicts(cur, cur.fetchall())
+
+
+class Database:
+    """Wrapper class that delegates to PostgreSQLDatabase if DATABASE_URL is set, otherwise SQLiteDatabase."""
+    def __init__(self):
+        db_url = os.environ.get("DATABASE_URL")
+        if db_url and (db_url.startswith("postgresql://") or db_url.startswith("postgres://")):
+            self.delegate = PostgreSQLDatabase(db_url)
+        else:
+            self.delegate = SQLiteDatabase()
+
+    def __getattr__(self, name):
+        return getattr(self.delegate, name)
 
 
 class BaseNotifier:

@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr
 from typing import Dict, Optional, List
 
-from core import SQLiteDatabase, EmailNotifier, WhatsAppNotifier
+from core import Database, EmailNotifier, WhatsAppNotifier
 from payments import PaymentProcessor
 
 app = FastAPI(title="Dynamic Form CMS")
@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-db = SQLiteDatabase()
+db = Database()
 
 # --- Pydantic Schemas ---
 class FormSchema(BaseModel):
@@ -78,7 +78,7 @@ class VerifyPaymentSchema(BaseModel):
 def dispatch_notifications_task(sub_id: int, form_slug: str, payment_link: str = ""):
     """Asynchronously formats and sends plain-text email and Meta WhatsApp alerts."""
     # Create thread-safe database connection inside background worker
-    local_db = SQLiteDatabase()
+    local_db = Database()
     
     # 1. Fetch related data
     form = local_db.get_form_by_slug(form_slug)

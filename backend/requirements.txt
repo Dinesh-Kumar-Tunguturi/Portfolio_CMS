@@ -3,3 +3,4 @@ uvicorn
 pydantic[email]
 httpx
 razorpay
+psycopg2-binary
