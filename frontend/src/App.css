@@ -79,22 +79,21 @@ body {
   box-sizing: border-box;
 }
 
-/* iPhone-Style Frosted Glass Bottom Navigation */
+/* Floating Dark Bottom Navigation (Curved Design) */
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 68px;
-  background: #ffffff;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+  bottom: 20px;
+  left: 20px;
+  width: calc(100% - 40px);
+  height: 65px;
+  background: #1c1c1e;
+  border-radius: 25px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-around;
   z-index: 1000;
-  padding: 0 0 env(safe-area-inset-bottom, 0) 0;
-  margin: 0;
+  padding: 0 5px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .bottom-nav-item {
@@ -103,14 +102,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #64748b;
-  gap: 4px;
+  color: #8e8e93;
   cursor: pointer;
-  transition: color 0.25s ease;
-  height: 100%;
-  padding: 8px 0 4px 0;
-  text-align: center;
+  height: 65px;
+  position: relative;
   -webkit-tap-highlight-color: transparent;
+  transition: all 0.25s ease;
 }
 
 .bottom-nav-item svg {
@@ -119,38 +116,91 @@ body {
   stroke: currentColor;
   stroke-width: 2.5;
   fill: none;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
   transition: all 0.25s ease;
+  margin-bottom: 4px;
 }
 
 .bottom-nav-item span {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: inherit;
   transition: color 0.25s ease;
 }
 
-/* Active State — Green Icon with Circle Background */
+/* Normal Active State */
 .bottom-nav-item.active {
-  color: var(--accent-dark);
+  color: #00ff41;
 }
 
-.bottom-nav-item.active svg {
-  stroke: #ffffff;
-  background: var(--accent-primary);
+/* ═══════ Center Raised Button (Submissions) ═══════ */
+.bottom-nav-item:nth-child(3) {
+  flex: none;
+  width: 70px;
+  height: 70px;
+  position: relative;
+  top: -25px;
+  background: transparent;
+}
+
+/* The curved cutout on the main bar */
+.bottom-nav-item:nth-child(3)::before,
+.bottom-nav-item:nth-child(3)::after {
+  content: "";
+  position: absolute;
+  top: 25px; /* Aligns exactly with the top of the main bar */
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  pointer-events: none;
+}
+.bottom-nav-item:nth-child(3)::before {
+  left: -21px; /* Slight overlap to prevent 1px sub-pixel gaps */
+  background: radial-gradient(circle at top left, transparent 21px, #1c1c1e 22px);
+}
+.bottom-nav-item:nth-child(3)::after {
+  right: -21px;
+  background: radial-gradient(circle at top right, transparent 21px, #1c1c1e 22px);
+}
+
+.center-circle-outer {
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  padding: 7px;
-  box-shadow: 0 3px 12px rgba(52, 211, 153, 0.35);
+  background: #1c1c1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px; /* Space for the inner green circle */
 }
 
-.bottom-nav-item.active span {
-  color: var(--accent-dark);
-  font-weight: 700;
+.center-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #2c2c2e; /* Default dark for inactive */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.bottom-nav-item.active .center-circle {
+  background: #00ff41; /* Vibrant green like screenshot */
+}
+
+.bottom-nav-item:nth-child(3) svg {
+  margin: 0;
+  width: 28px;
+  height: 28px;
+  stroke: #8e8e93; /* Inactive icon color */
+}
+.bottom-nav-item.active:nth-child(3) svg {
+  stroke: #1c1c1e; /* Dark icon on bright green background */
+}
+
+.bottom-nav-item:nth-child(3) span {
+  display: none; /* Hide text for the big center button */
 }
 
 /* Compact Submissions Cards CSS */
