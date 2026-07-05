@@ -678,35 +678,30 @@ class EmailNotifier(BaseNotifier):
         subject = self.interpolate(form_config["email_subject"], submission)
         body = self.interpolate(form_config["email_body"], submission)
 
-        import socket
-        orig_getaddrinfo = socket.getaddrinfo
-        def ipv4_getaddrinfo(h, p, family=0, type=0, proto=0, flags=0):
-            return orig_getaddrinfo(h, p, socket.AF_INET, type, proto, flags)
-
         try:
-            socket.getaddrinfo = ipv4_getaddrinfo
-
             msg = MIMEText(body, "plain", "utf-8")
             msg["Subject"] = subject
             msg["From"] = f"{from_name} <{user}>"
             msg["To"] = recipient
 
             port = int(port)
-            # Use SSL if port is 465, else use standard STARTTLS
             if port == 465:
-                with smtplib.SMTP_SSL(host, port, timeout=10) as server:
+                with smtplib.SMTP_SSL(host, port, timeout=15) as server:
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             else:
-                with smtplib.SMTP(host, port, timeout=10) as server:
+                with smtplib.SMTP(host, port, timeout=15) as server:
                     server.starttls()
                     server.login(user, pwd)
                     server.sendmail(user, [recipient], msg.as_string())
             return "SUCCESS", f"Email successfully sent to {recipient}"
+        except TimeoutError:
+            return "FAILED", "SMTP Error: Connection Timed Out. (Note: Gmail blocks Vercel/AWS IPs. Use Resend/Sendgrid instead)."
         except Exception as e:
-            return "FAILED", f"SMTP Error: {str(e)}"
-        finally:
-            socket.getaddrinfo = orig_getaddrinfo
+            err_msg = str(e)
+            if "Network is unreachable" in err_msg:
+                err_msg += " (Vercel/AWS blocked the connection to Gmail. You must use an Email API like Resend, Sendgrid, or Mailgun)."
+            return "FAILED", f"SMTP Error: {err_msg}"
 
 
 class WhatsAppNotifier(BaseNotifier):
